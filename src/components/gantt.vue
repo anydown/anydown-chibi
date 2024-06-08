@@ -12,7 +12,7 @@
           @dblclick="addTaskAt" />
 
         <g transform="translate(0, -28)">
-          <rect class="dateBackground" :class="{ 'grabbing': this.dragging === 'date' }" x="0" y="-20" fill="white"
+          <rect class="dateBackground" :class="{ 'grabbing': dragging === 'date' }" x="0" y="-20" fill="white"
             :width="svgWidth" height="48" @pointermove="moveDate" @pointerdown="downDate" @pointerup="upDate" />
 
           <g>
@@ -51,8 +51,8 @@
             <foreignObject class="inlineEditing" height="24"
               :width="scaleLength(task.end - task.start) < 200 ? 200 : scaleLength(task.end - task.start)"
               v-if="editing === index">
-              <form @submit.prevent="endEditing(index)">
-                <input class="editingText" v-model="editingText" @blur="endEditing(index)" />
+              <form @submit.prevent="endEditing()">
+                <input class="editingText" v-model="editingText" @blur="endEditing()" />
               </form>
             </foreignObject>
           </g>
@@ -111,13 +111,17 @@ import * as util from "./gantt-util.js";
 import * as scale from "d3-scale";
 import holiday from "@holiday-jp/holiday_jp";
 
+
 export default defineComponent({
   props: {
-    input: String
+    input: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {
-      tasks: [],
+      tasks: [] as gantt.Task[],
       taskName: "",
       svgWidth: 600,
       draggingIndex: -1,
@@ -132,20 +136,22 @@ export default defineComponent({
       displayOffset: 0,
       editing: -1,
       editingText: "",
-      old: null
+      old: null as number | null
     };
   },
   methods: {
     exportPng() {
       // scale 2x
-      util.saveSvgAsPng(document, this.$refs.gantt, 2);
+      util.saveSvgAsPng(document, this.$refs.gantt as SVGSVGElement, 2);
     },
-    moveTo(task) {
+    moveTo(task: gantt.Task) {
       //TODO move to task
       console.log(this.scale(task.start))
     },
-    addTaskAt(ev) {
-      if (ev.target.classList.contains("background")) {
+    addTaskAt(ev: MouseEvent) {
+      const target = ev.target as HTMLElement;
+
+      if (target.classList.contains("background")) {
         const start = util.resetHMSfromEpoc(this.invert(ev.offsetX));
         const index = Math.floor((ev.offsetY - 48) / 32);
 
@@ -158,7 +164,7 @@ export default defineComponent({
         this.editTask(index);
       }
     },
-    editTask(index) {
+    editTask(index: number) {
       this.editing = index;
       this.editingText = this.tasks[this.editing].name;
       this.selectedIndex = -1;
@@ -185,18 +191,18 @@ export default defineComponent({
         });
       }
     },
-    downDate(e) {
-      const el = e.currentTarget;
-      el.setPointerCapture(e.pointerId);
+    downDate(e: PointerEvent) {
+      const el = e.currentTarget as HTMLElement;
+      el?.setPointerCapture(e.pointerId);
       this.dragging = "date";
       this.dragOffset.x = e.offsetX;
       this.old = this.displayOffset;
     },
-    upDate(e) {
+    upDate(e: PointerEvent) {
       this.dragging = "none";
     },
-    moveDate(e) {
-      if (this.dragging === "date") {
+    moveDate(e: PointerEvent) {
+      if (this.dragging === "date" && this.old !== null) {
         const diff = e.offsetX - this.dragOffset.x;
         this.displayOffset =
           this.old -
@@ -205,7 +211,7 @@ export default defineComponent({
           );
       }
     },
-    onDrag(e) {
+    onDrag(e: PointerEvent) {
       if (this.dragging === "move") {
         const len = this.draggingItem.end - this.draggingItem.start;
         //差分値を基点に反映
@@ -218,8 +224,8 @@ export default defineComponent({
         this.draggingItem.end = this.invert(e.offsetX);
       }
     },
-    startDrag(e, index) {
-      const el = e.currentTarget;
+    startDrag(e: PointerEvent, index: number) {
+      const el = e.currentTarget as HTMLElement;
       el.setPointerCapture(e.pointerId);
 
       this.dragging = "move";
@@ -232,8 +238,8 @@ export default defineComponent({
       const len = this.draggingItem.end - this.draggingItem.start;
       this.onDrag(e);
     },
-    startResize(e, index) {
-      const el = e.currentTarget;
+    startResize(e: PointerEvent, index: number) {
+      const el = e.currentTarget as HTMLElement;
       el.setPointerCapture(e.pointerId);
 
       this.draggingIndex = index;
@@ -265,20 +271,20 @@ export default defineComponent({
       this.draggingIndex = -1;
       this.dragoverIndex = -1;
     },
-    scaleLength(epocdiff) {
+    scaleLength(epocdiff: number) {
       return (
         ((epocdiff / (24 * 60 * 60 * 1000)) * this.svgWidth) /
         this.displayRangeLength
       );
     },
-    scale(epoc) {
+    scale(epoc: number) {
       //epoc to screen
       return scale
         .scaleLinear()
         .domain(this.timeRange)
         .range([0, this.svgWidth])(epoc);
     },
-    invert(x) {
+    invert(x: number) {
       //screen to epoc
       return scale
         .scaleLinear()
@@ -286,10 +292,10 @@ export default defineComponent({
         .range([0, this.svgWidth])
         .invert(x);
     },
-    setTasks(input) {
+    setTasks(input: string) {
       this.tasks = gantt.compile(input);
     },
-    addTask(task) {
+    addTask() {
       this.tasks.push({
         name: "New Task",
         start: util.getRelativeDate(0).getTime(),
@@ -298,7 +304,7 @@ export default defineComponent({
       this.$emit("change", gantt.serialize(this.tasks));
       this.editTask(this.tasks.length - 1);
     },
-    moveRange(offset) {
+    moveRange(offset: number) {
       const moveAmount = offset * (this.longView ? 31 : 7);
       this.displayOffset += moveAmount;
     },
@@ -363,7 +369,7 @@ export default defineComponent({
       this.tasks.splice(this.selectedIndex, 1);
       this.$emit("change", gantt.serialize(this.tasks));
     },
-    selectEdit(ev) {
+    selectEdit(ev: KeyboardEvent) {
       if (this.selectedIndex === -1) {
         return;
       }
@@ -436,7 +442,13 @@ export default defineComponent({
   }
 })
 
-function generateLineByRange(start, end, displayRange, svgWidth) {
+interface Range {
+  start: number;
+  end: number;
+
+}
+
+function generateLineByRange(start: number, end: number, displayRange: Range, svgWidth: number) {
   let lines = [];
   const len = end - start;
   let month = -1;

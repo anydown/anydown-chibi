@@ -31,7 +31,7 @@ function ymdFromEpoc(epoc: number, offset?: number) {
   return ymd(d);
 }
 
-interface Task {
+export interface Task {
   name: string;
   start: number;
   end: number;
