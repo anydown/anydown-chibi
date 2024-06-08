@@ -119,6 +119,8 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ["change"],
+
   data() {
     return {
       tasks: [] as gantt.Task[],

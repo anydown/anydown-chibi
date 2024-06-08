@@ -14,36 +14,47 @@ function removeMarkup(line: string, chara: string) {
     .trim();
 }
 
-interface Kanban {
+export interface Card {
   name: string;
-  cards: string[];
+  id: number;
+}
+
+export interface Kanban {
+  name: string;
+  id: number;
+  cards: Card[];
 }
 
 export function compileKanban(input: string) {
   const lines = input.split(/[\r|\n|\r\n]/);
   const output: Kanban[] = [];
-  let cards: string[] = [];
-  lines.forEach(function (line) {
+  let cards: Card[] = [];
+  let count = 0;
+  lines.forEach(function (line, index) {
     if (isHeading(line)) {
       cards = [];
 
       output.push({
+        id: index,
         name: removeMarkup(line, "#"),
         cards: cards,
       });
     } else if (isList(line)) {
-      cards.push(removeMarkup(removeMarkup(line, "-"), "*"));
+      cards.push({
+        name: removeMarkup(removeMarkup(line, "-"), "*"),
+        id: count++,
+      });
     }
   });
   return output;
 }
 
-function cardsToString(cards: string[]) {
+function cardsToString(cards: Card[]) {
   return cards.map(toList).join("\n");
 }
 
-function toList(card: string) {
-  return "- " + card;
+function toList(card: Card) {
+  return "- " + card.name;
 }
 
 export function serializeKanban(data: Kanban[]) {

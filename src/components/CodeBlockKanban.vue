@@ -6,8 +6,8 @@
     </div>
     <draggable v-if="compiled.length > 0" v-model="compiled" group="everykanbanCol" @change="onEnd"
       style="display: flex; flex: 1; position: relative;" handle=".kanban__col-title" ghost-class="ghost"
-      @start="drag = true" @end="drag = false">
-      <template #item="{ col, colIndex }">
+      @start="drag = true" @end="drag = false" item-key="id">
+      <template #item="{ element: col, index: colIndex }">
         <div class="kanban__col" @click.exact="addSelectionCol(colIndex, false)"
           @click.ctrl="addSelectionCol(colIndex, true)" :class="{ selected: isSelectedCol(colIndex) }"
           @dblclick="addTaskByDblclick(colIndex, $event)">
@@ -27,15 +27,15 @@
           </div>
           <div class="kanban__wrapper">
             <draggable v-model="col.cards" group="everykanban" class="draggable--max" @change="onEnd"
-              ghost-class="ghost" @start="drag = true" @end="drag = false">
-              <template #item="{ card, index }" item-key="index">
+              ghost-class="ghost" @start="drag = true" @end="drag = false" item-key="id">
+              <template #item="{ element: card, index }">
                 <div class="kanban__row" @dblclick="startEditing(colIndex, index)"
                   @click.exact.stop="addSelectionCard(colIndex, index, false)"
                   @click.ctrl.stop="addSelectionCard(colIndex, index, true)"
                   :class="{ selected: isSelectedCard(colIndex, index) }">
                   <div class="kanban__row__remove" @click="removeTask(colIndex, index)">×</div>
                   <div class="kanban__row__label" v-if="!(editingCol === colIndex && editingIndex === index)"
-                    v-text="card">
+                    v-text="card.name">
                   </div>
                   <form v-if="editingCol === colIndex && editingIndex === index"
                     @submit.prevent="endEditingAndNew(colIndex, index)" style="margin: 0;">
@@ -64,19 +64,23 @@ const md = new MarkdownIt();
 
 export default defineComponent({
   props: {
-    input: String
+    input: {
+      type: String,
+      required: true
+    }
   },
+  emits: ["change"],
   data() {
     return {
-      compiled: [],
+      compiled: [] as compiler.Kanban[],
       editingText: "",
       editingTitleColText: "",
       editingTitleCol: -1,
       editingCol: -1,
       editingIndex: -1,
-      selectedCol: [],
+      selectedCol: [] as number[],
       selectedCards: { col: -1, cards: [] },
-      copied: null,
+      copied: null as { type: string; data: any } | null,
       drag: false,
     };
   },
@@ -104,7 +108,7 @@ export default defineComponent({
     this.compiled = compiler.compileKanban(this.input);
   },
   methods: {
-    globalKeydown(ev) {
+    globalKeydown(ev: KeyboardEvent) {
       if (ev.key === "Delete") {
         this.onRemove();
       }
@@ -200,7 +204,7 @@ export default defineComponent({
         this.$emit("change", compiler.serializeKanban(this.compiled));
       }
     },
-    addSelectionCol(col, multiple) {
+    addSelectionCol(col: number, multiple: boolean) {
       this.selectedCards = {
         col: -1,
         cards: []
@@ -211,16 +215,16 @@ export default defineComponent({
       this.selectedCol.push(col);
       this.selectedCol.sort();
     },
-    isSelectedCol(selectedCol) {
+    isSelectedCol(selectedCol: number) {
       return this.selectedCol.indexOf(selectedCol) >= 0;
     },
-    isSelectedCard(selectedCol, cardIndex) {
+    isSelectedCard(selectedCol: number, cardIndex: number) {
       return (
         this.selectedCards.col === selectedCol &&
         this.selectedCards.cards.indexOf(cardIndex) >= 0
       );
     },
-    addSelectionCard(col, card, multiple) {
+    addSelectionCard(col: number, card: number, multiple: boolean) {
       this.selectedCol = [];
       if (!multiple) {
         this.selectedCards.cards = [];
@@ -232,22 +236,23 @@ export default defineComponent({
     addColumn() {
       this.compiled.push({
         name: "New Column",
-        cards: []
+        cards: [],
+        id: Math.random()
       });
       this.$emit("change", compiler.serializeKanban(this.compiled));
     },
-    removeColumn(idx) {
+    removeColumn(idx: number) {
       this.compiled.splice(idx, 1);
       this.$emit("change", compiler.serializeKanban(this.compiled));
     },
     onEnd() {
       this.$emit("change", compiler.serializeKanban(this.compiled));
     },
-    startEditing(col, row) {
+    startEditing(col: number, row: number) {
       const oldData = this.compiled[col].cards[row];
       this.editingCol = col;
       this.editingIndex = row;
-      this.editingText = oldData;
+      this.editingText = oldData.name;
       this.$nextTick(() => {
         const el = this.$el.querySelector(".kanban__row__input");
         if (el) {
@@ -255,39 +260,41 @@ export default defineComponent({
         }
       });
     },
-    endEditing(col, row) {
+    endEditing(col: number, row: number) {
       if (this.editingText === "") {
         this.removeTask(col, row);
       } else {
-        this.$set(this.compiled[col].cards, row, this.editingText);
+        this.compiled[col].cards[row].name = this.editingText
         this.$emit("change", compiler.serializeKanban(this.compiled));
       }
       this.editingCol = -1;
       this.editingIndex = -1;
     },
-    endEditingAndNew(col, row) {
+    endEditingAndNew(col: number, row: number) {
       this.endEditing(col, row);
       //for VSCode webview hack, I really want to remove this timeout
       setTimeout(() => {
         this.addTask(col);
       }, 100);
     },
-    addTask(col) {
-      this.compiled[col].cards.push("");
+    addTask(col: number) {
+      this.compiled[col].cards.push({ name: "", id: Math.random() });
       this.startEditing(col, this.compiled[col].cards.length - 1);
     },
-    addTaskByDblclick(col, ev) {
+    addTaskByDblclick(col: number, ev: MouseEvent) {
       // because of we use vue-draggable
-      if (ev.target.classList.contains("draggable--max")) {
+      const target = ev.target as HTMLElement;
+
+      if (target.classList.contains("draggable--max")) {
         this.addTask(col);
       }
     },
-    removeTask(col, row) {
+    removeTask(col: number, row: number) {
       const oldData = this.compiled[col].cards[row];
-      this.$delete(this.compiled[col].cards, row);
+      delete this.compiled[col].cards[row];
       this.$emit("change", compiler.serializeKanban(this.compiled));
     },
-    editTitle(col) {
+    editTitle(col: number) {
       this.editingTitleCol = col;
       const oldData = this.compiled[col].name;
       this.editingTitleColText = oldData;
@@ -299,7 +306,7 @@ export default defineComponent({
         }
       });
     },
-    endEditingTitle(col) {
+    endEditingTitle(col: number) {
       if (this.editingTitleColText === "") {
         this.editingTitleCol = -1;
       } else {

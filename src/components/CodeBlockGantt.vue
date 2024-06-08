@@ -9,6 +9,8 @@ export default defineComponent({
   props: {
     input: String
   },
+  emits: ["change"],
+
   data() {
     return {};
   },
