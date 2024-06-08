@@ -1,23 +1,23 @@
-export function resetHMS(d) {
+export function resetHMS(d: Date) {
   d.setHours(0);
   d.setMinutes(0);
   d.setSeconds(0);
   d.setMilliseconds(0);
   return d;
 }
-export function resetHMSfromEpoc(epoc) {
+export function resetHMSfromEpoc(epoc: number) {
   return resetHMS(new Date(epoc)).getTime();
 }
-export function roundHMSfromEpoc(epoc) {
+export function roundHMSfromEpoc(epoc: number) {
   return resetHMS(new Date(epoc + (24 * 60 * 60 * 1000) / 2)).getTime();
 }
-export function getRelativeDate(day) {
+export function getRelativeDate(day: number) {
   let d = new Date();
   resetHMS(d);
   d.setDate(d.getDate() + day);
   return d;
 }
-export function getNewDate(str, offset) {
+export function getNewDate(str: string, offset: number) {
   const m = str.match(/(\d+)-(\d+)-(\d+)/);
   if (!m) {
     let d = new Date();
@@ -47,7 +47,7 @@ export function getMonthArray() {
       "9月",
       "10月",
       "11月",
-      "12月"
+      "12月",
     ],
     en: [
       "January",
@@ -61,11 +61,15 @@ export function getMonthArray() {
       "September",
       "October",
       "November",
-      "December"
-    ]
+      "December",
+    ],
   };
 }
-export function saveSvgAsPng(document, el, ratio) {
+export function saveSvgAsPng(
+  document: Document,
+  el: SVGSVGElement,
+  ratio: number,
+) {
   const svgData = new XMLSerializer().serializeToString(el);
   const canvas = document.createElement("canvas");
   const width = el.width.baseVal.value;
@@ -74,8 +78,11 @@ export function saveSvgAsPng(document, el, ratio) {
   canvas.height = height * ratio;
 
   const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return;
+  }
   const image = new Image();
-  image.onload = function() {
+  image.onload = function () {
     ctx.drawImage(
       image,
       0,
@@ -85,14 +92,13 @@ export function saveSvgAsPng(document, el, ratio) {
       0,
       0,
       canvas.width,
-      canvas.height
+      canvas.height,
     );
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
     a.setAttribute("download", "gantt.png");
     a.dispatchEvent(new MouseEvent("click"));
   };
-  image.src =
-    "data:image/svg+xml;charset=utf-8;base64," +
+  image.src = "data:image/svg+xml;charset=utf-8;base64," +
     btoa(unescape(encodeURIComponent(svgData)));
 }

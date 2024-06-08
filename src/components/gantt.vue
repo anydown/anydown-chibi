@@ -104,13 +104,14 @@
   </div>
 </template>
 <script lang="ts">
+import { defineComponent } from 'vue'
 
 import * as gantt from "./gantt-compiler";
 import * as util from "./gantt-util.js";
 import * as scale from "d3-scale";
 import holiday from "@holiday-jp/holiday_jp";
 
-export default {
+export default defineComponent({
   props: {
     input: String
   },
@@ -433,7 +434,7 @@ export default {
     });
     this.svgWidth = this.$el.clientWidth;
   }
-};
+})
 
 function generateLineByRange(start, end, displayRange, svgWidth) {
   let lines = [];
