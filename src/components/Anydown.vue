@@ -6,7 +6,8 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
 import MarkdownBlock from "./MarkdownBlock.vue";
 // import CodeBlockKanban from "./CodeBlockKanban.vue";
 // import CodeBlockGantt from "./CodeBlockGantt.vue";
@@ -14,10 +15,16 @@ import MarkdownBlock from "./MarkdownBlock.vue";
 // import CodeBlockBlock from "./CodeBlockBlock.vue";
 import CodeBlockPre from "./CodeBlockPre.vue";
 
-export default {
+interface Block {
+  id: string;
+  type: string;
+  text: string;
+}
+
+export default defineComponent({
   props: ["blocks"],
   methods: {
-    onChange(ev, block) {
+    onChange(ev: string, block: Block) {
       this.$emit("change", {
         id: block.id,
         type: block.type,
@@ -33,7 +40,7 @@ export default {
     // block: CodeBlockBlock,
     plain: CodeBlockPre
   }
-};
+})
 </script>
 
 <style></style>

@@ -16,10 +16,10 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
 import Anydown from "./components/Anydown.vue";
 import { compile } from "./util/document-compiler";
-
 const example = `# anydown
 
 \`\`\`gantt
@@ -47,7 +47,7 @@ item,box,340,260,200,100
 \`\`\`
 `;
 
-export default {
+export default defineComponent({
   data() {
     return {
       input: example,
@@ -60,7 +60,7 @@ export default {
     }
   },
   methods: {
-    updateBlock(payload) {
+    updateBlock(payload: { id: number; type: string; body: string }) {
       this.splited[payload.id].text = payload.type + "\n" + payload.body;
       this.input = this.splited.map(i => i.text).join("```");
     }
@@ -80,7 +80,7 @@ export default {
       this.input = decodeURIComponent(data);
     }
   }
-};
+});
 </script>
 <style>
 .wrapper {

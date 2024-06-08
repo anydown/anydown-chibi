@@ -1,4 +1,4 @@
-export function compile(input) {
+export function compile(input: string) {
   return input.split("```").map((block, index) => {
     //必ず奇数indexがcode blockになる
     let type = "markdown";
@@ -22,9 +22,7 @@ export function compile(input) {
     return {
       text: block,
       type: type,
-      id: index
+      id: index,
     };
-  })
+  });
 }
-
-

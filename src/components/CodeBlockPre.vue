@@ -1,18 +1,19 @@
 <template>
-    <pre v-text="text"></pre>
+  <pre v-text="text"></pre>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue'
+export default defineComponent({
   props: {
     input: String
   },
   computed: {
     text() {
-      return this.input.slice(1);
+      return this.input?.slice(1);
     }
   }
-};
+});
 </script>
 
 <style>
