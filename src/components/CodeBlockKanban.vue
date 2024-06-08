@@ -58,9 +58,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import draggable from "vuedraggable";
-import MarkdownIt from "markdown-it";
 import * as compiler from "./kanban-compiler";
-const md = new MarkdownIt();
 
 export default defineComponent({
   props: {
@@ -341,6 +339,7 @@ export default defineComponent({
   border: 1px solid #f5f5f5;
   display: flex;
   flex-direction: column;
+  border-radius: 6px;
 }
 
 .kanban__col.selected {
@@ -353,6 +352,7 @@ export default defineComponent({
   font-weight: 900;
   color: #888888;
   cursor: pointer;
+  margin-top: 4px;
 }
 
 .kanban__row:hover>.kanban__row__remove {
@@ -361,7 +361,7 @@ export default defineComponent({
 
 .kanban__col__add {
   position: absolute;
-  top: 6px;
+  top: 10px;
   right: 8px;
   width: 20px;
   height: 20px;
@@ -396,17 +396,17 @@ export default defineComponent({
 }
 
 .kanban__row {
-  margin: 0.5rem 0;
-  padding: 0.5rem;
+  margin: 0.5rem 0 0 0;
+  padding: 0.5rem 0.75rem;
   text-align: left;
-  background: white;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  background: #fefefe;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.16), 0 2px 4px 0 rgba(0, 0, 0, 0.12);
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 3px;
   line-height: 1.6rem;
   word-break: break-all;
   position: relative;
-  border: 1px solid white;
+  border: 1px solid #fefefe;
   box-sizing: border-box;
 }
 
@@ -426,6 +426,7 @@ export default defineComponent({
 
 .kanban__wrapper {
   min-height: 10rem;
+  padding-top: 4px;
   display: flex;
   flex-direction: column;
   flex: 1;
