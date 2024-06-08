@@ -9,7 +9,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import MarkdownBlock from "./MarkdownBlock.vue";
-// import CodeBlockKanban from "./CodeBlockKanban.vue";
+import CodeBlockKanban from "./CodeBlockKanban.vue";
 import CodeBlockGantt from "./CodeBlockGantt.vue";
 // import CodeBlockCsv from "./CodeBlockCsv.vue";
 // import CodeBlockBlock from "./CodeBlockBlock.vue";
@@ -34,7 +34,7 @@ export default defineComponent({
   },
   components: {
     markdown: MarkdownBlock,
-    // kanban: CodeBlockKanban,
+    kanban: CodeBlockKanban,
     gantt: CodeBlockGantt,
     // csv: CodeBlockCsv,
     // block: CodeBlockBlock,
