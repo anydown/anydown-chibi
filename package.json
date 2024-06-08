@@ -13,8 +13,10 @@
     "vue": "^3.3.4"
   },
   "devDependencies": {
+    "@holiday-jp/holiday_jp": "^2.4.0",
     "@types/markdown-it": "^14.1.1",
     "@vitejs/plugin-vue": "^4.2.3",
+    "d3-scale": "^4.0.2",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vue-tsc": "^1.8.5"
