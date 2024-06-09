@@ -200,7 +200,7 @@ export default defineComponent({
       this.dragOffset.x = e.offsetX;
       this.old = this.displayOffset;
     },
-    upDate(e: PointerEvent) {
+    upDate(_e: PointerEvent) {
       this.dragging = "none";
     },
     moveDate(e: PointerEvent) {
@@ -237,7 +237,6 @@ export default defineComponent({
       this.dragOffset.x = e.offsetX - this.scale(this.draggingItem.start);
       this.dragOffset.y = e.offsetY - index * 32 - 48;
 
-      const len = this.draggingItem.end - this.draggingItem.start;
       this.onDrag(e);
     },
     startResize(e: PointerEvent, index: number) {

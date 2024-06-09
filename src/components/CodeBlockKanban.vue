@@ -77,7 +77,7 @@ export default defineComponent({
       editingCol: -1,
       editingIndex: -1,
       selectedCol: [] as number[],
-      selectedCards: { col: -1, cards: [] },
+      selectedCards: { col: -1, cards: [] as number[] },
       copied: null as { type: string; data: any } | null,
       drag: false,
     };
@@ -142,7 +142,7 @@ export default defineComponent({
         return;
       }
       if (this.selectedCol.length > 0) {
-        const copied = this.compiled.filter((i, idx) => {
+        const copied = this.compiled.filter((_i: compiler.Kanban, idx: number) => {
           return this.selectedCol.indexOf(idx) >= 0;
         });
         this.copied = {
@@ -152,7 +152,7 @@ export default defineComponent({
       }
       if (this.selectedCards.col >= 0) {
         const copied = this.compiled[this.selectedCards.col].cards.filter(
-          (i, idx) => {
+          (_i, idx: number) => {
             return this.selectedCards.cards.indexOf(idx) >= 0;
           }
         );
@@ -288,7 +288,6 @@ export default defineComponent({
       }
     },
     removeTask(col: number, row: number) {
-      const oldData = this.compiled[col].cards[row];
       delete this.compiled[col].cards[row];
       this.$emit("change", compiler.serializeKanban(this.compiled));
     },
